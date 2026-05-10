@@ -1,6 +1,11 @@
 from crewai import Agent
-from crewai_tools import SerperDevTool, TavilySearchTool
+from crewai_tools import SerperDevTool
 from ..config import get_settings
+
+try:
+    from crewai_tools import TavilySearchTool as _TavilySearchTool
+except ImportError:
+    _TavilySearchTool = None
 
 
 def make_web_search_agent() -> Agent:
@@ -9,8 +14,8 @@ def make_web_search_agent() -> Agent:
 
     if settings.serpapi_api_key:
         tools.append(SerperDevTool())
-    if settings.tavily_api_key:
-        tools.append(TavilySearchTool())
+    if settings.tavily_api_key and _TavilySearchTool is not None:
+        tools.append(_TavilySearchTool())
 
     # Always include DuckDuckGo as a free fallback
     try:

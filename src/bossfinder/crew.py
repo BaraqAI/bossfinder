@@ -32,7 +32,7 @@ from .models.person import CompanySearchResult
 
 
 def _wire_env() -> None:
-    """Ensure crewai-tools see the right env vars."""
+    """Ensure crewai and crewai-tools see the right env vars."""
     settings = get_settings()
     if settings.serpapi_api_key:
         os.environ.setdefault("SERPER_API_KEY", settings.serpapi_api_key)
@@ -40,6 +40,8 @@ def _wire_env() -> None:
         os.environ.setdefault("TAVILY_API_KEY", settings.tavily_api_key)
     if settings.openai_api_key:
         os.environ.setdefault("OPENAI_API_KEY", settings.openai_api_key)
+    if settings.anthropic_api_key:
+        os.environ.setdefault("ANTHROPIC_API_KEY", settings.anthropic_api_key)
 
 
 def run_bossfinder(company: str) -> CompanySearchResult:

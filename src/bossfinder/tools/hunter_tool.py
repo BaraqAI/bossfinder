@@ -27,7 +27,7 @@ class HunterDomainTool(BaseTool):
         domain = company if "." in company else None
 
         try:
-            params: dict = {"api_key": self.api_key, "limit": 50}
+            params: dict = {"api_key": self.api_key, "limit": 10}
             if domain:
                 params["domain"] = domain
             else:
