@@ -24,9 +24,12 @@ class NewsApiPeopleTool(BaseTool):
             return "SKIP: NEWS_API_KEY not configured"
 
         queries = [
-            f'"{company}" CEO',
-            f'"{company}" founder',
-            f'"{company}" executive appointment',
+            f'"{company}" CEO OR founder OR president',
+            f'"{company}" CTO OR CFO OR COO OR CMO',
+            f'"{company}" VP OR "vice president" OR director',
+            f'"{company}" executive appointed OR named OR joins OR promoted',
+            f'"{company}" "board of directors" OR "advisory board"',
+            f'"{company}" "leadership team" OR "management team"',
         ]
 
         lines = []
@@ -39,7 +42,7 @@ class NewsApiPeopleTool(BaseTool):
                     params={
                         "q": q,
                         "apiKey": self.api_key,
-                        "pageSize": 5,
+                        "pageSize": 10,
                         "sortBy": "relevancy",
                         "language": "en",
                     },

@@ -26,9 +26,11 @@ class Settings(BaseSettings):
     twitter_access_token: str = Field(default="", alias="TWITTER_ACCESS_TOKEN")
     twitter_access_token_secret: str = Field(default="", alias="TWITTER_ACCESS_TOKEN_SECRET")
 
-    # Email
+    # Email & contact discovery
     hunter_api_key: str = Field(default="", alias="HUNTER_API_KEY")
     apollo_api_key: str = Field(default="", alias="APOLLO_API_KEY")
+    snov_client_id: str = Field(default="", alias="SNOV_CLIENT_ID")
+    snov_client_secret: str = Field(default="", alias="SNOV_CLIENT_SECRET")
 
 
     # GitHub
