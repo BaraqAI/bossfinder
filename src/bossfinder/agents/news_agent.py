@@ -27,5 +27,6 @@ def make_news_agent() -> Agent:
         tools=tools,
         verbose=True,
         allow_delegation=False,
+        max_iter=5,
         llm=settings.crew_llm_model,
     )

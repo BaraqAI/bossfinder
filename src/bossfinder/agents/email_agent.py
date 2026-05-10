@@ -37,5 +37,6 @@ def make_email_agent() -> Agent:
         tools=tools,
         verbose=True,
         allow_delegation=False,
+        max_iter=10,
         llm=settings.crew_llm_model,
     )

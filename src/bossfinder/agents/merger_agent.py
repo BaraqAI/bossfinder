@@ -24,5 +24,6 @@ def make_merger_agent() -> Agent:
         tools=[],
         verbose=True,
         allow_delegation=False,
+        max_iter=3,
         llm=settings.crew_llm_model,
     )

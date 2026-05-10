@@ -43,6 +43,7 @@ def make_web_search_agent() -> Agent:
         tools=tools,
         verbose=True,
         allow_delegation=False,
+        max_iter=5,
         llm=settings.crew_llm_model,
     )
 
@@ -75,5 +76,6 @@ def make_hunter_enrichment_agent() -> Agent:
         tools=tools,
         verbose=True,
         allow_delegation=False,
+        max_iter=5,
         llm=settings.crew_llm_model,
     )

@@ -27,5 +27,6 @@ def make_linkedin_agent() -> Agent:
         tools=tools,
         verbose=True,
         allow_delegation=False,
+        max_iter=8,
         llm=settings.crew_llm_model,
     )

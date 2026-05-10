@@ -22,5 +22,6 @@ def make_github_agent() -> Agent:
         tools=[GitHubOrgMembersTool()],
         verbose=True,
         allow_delegation=False,
+        max_iter=5,
         llm=settings.crew_llm_model,
     )
