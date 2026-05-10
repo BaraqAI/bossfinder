@@ -20,6 +20,7 @@ class PersonContact(BaseModel):
     bio: Optional[str] = None
     sources: list[str] = Field(default_factory=list)
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    seniority_rank: Optional[int] = None
 
     def merge(self, other: "PersonContact") -> "PersonContact":
         """Merge another record into this one, keeping the richest data."""

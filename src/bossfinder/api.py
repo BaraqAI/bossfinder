@@ -37,8 +37,8 @@ app = FastAPI(
     title="BossFinder",
     description=(
         "Multi-agent company intelligence API. "
-        "Given a company name it searches LinkedIn, Twitter/X, GitHub, Hunter.io, "
-        "Apollo.io, People Data Labs, NewsAPI, and the open web to find key people and contacts."
+        "Given a company name it searches LinkedIn, GitHub, Hunter.io, "
+        "NewsAPI, and the open web to find key people and contacts."
     ),
     version="0.1.0",
     lifespan=lifespan,
@@ -72,6 +72,7 @@ class PersonResponse(BaseModel):
     bio: str | None = None
     sources: list[str] = []
     confidence: float = 0.0
+    seniority_rank: int | None = None
 
 
 class SearchResponse(BaseModel):
@@ -128,6 +129,7 @@ async def search_company(request: SearchRequest) -> SearchResponse:
             bio=p.bio,
             sources=p.sources,
             confidence=round(p.confidence, 3),
+            seniority_rank=p.seniority_rank,
         )
         for p in result.people
     ]

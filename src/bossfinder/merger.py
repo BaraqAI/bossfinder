@@ -13,6 +13,27 @@ try:
 except ImportError:
     _HAS_RAPIDFUZZ = False
 
+# Lower number = more senior
+_SENIORITY_TIERS: list[tuple[int, list[str]]] = [
+    (1, ["founder", "co-founder", "cofounder", "ceo", "co-ceo", "president", "executive chairman", "board"]),
+    (2, ["cto", "cfo", "coo", "cmo", "cpo", "ciso", "cro", "clo", "chief"]),
+    (3, ["evp", "executive vice president", "svp", "senior vice president"]),
+    (4, ["vp ", "vice president", "general manager", "managing director"]),
+    (5, ["director", "head of", "head,"]),
+    (6, ["principal", "senior manager", "manager", "lead"]),
+    (7, ["senior ", "staff "]),
+]
+
+
+def _seniority_tier(title: str) -> int:
+    if not title:
+        return 99
+    t = title.lower()
+    for tier, keywords in _SENIORITY_TIERS:
+        if any(kw in t for kw in keywords):
+            return tier
+    return 8
+
 
 def _normalize_name(name: str) -> str:
     return re.sub(r"\s+", " ", name.strip().lower())
@@ -108,10 +129,13 @@ def merge_results(all_people: list[PersonContact], company: str) -> CompanySearc
         if not matched:
             merged.append(person.model_copy(deep=True))
 
-    # Sort by confidence desc, then by number of contact channels desc
+    # Sort by seniority tier asc (1=most senior), then confidence desc, then contact richness desc
     merged.sort(
-        key=lambda p: (p.confidence, len(p.email) + len(p.phone) + bool(p.linkedin_url)),
-        reverse=True,
+        key=lambda p: (
+            _seniority_tier(p.title or ""),
+            -p.confidence,
+            -(len(p.email) + len(p.phone) + bool(p.linkedin_url)),
+        ),
     )
 
     return CompanySearchResult(

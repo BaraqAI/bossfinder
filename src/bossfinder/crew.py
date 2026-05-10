@@ -12,6 +12,7 @@ from .agents.github_agent import make_github_agent
 from .agents.news_agent import make_news_agent
 from .agents.web_search_agent import make_web_search_agent, make_hunter_enrichment_agent
 from .agents.merger_agent import make_merger_agent
+from .agents.ranker_agent import make_ranker_agent
 
 from .tasks.search_tasks import (
     make_linkedin_task,
@@ -22,6 +23,7 @@ from .tasks.search_tasks import (
     make_web_search_task,
     make_enrichment_task,
     make_merger_task,
+    make_ranker_task,
 )
 
 from .config import get_settings
@@ -56,6 +58,7 @@ def run_bossfinder(company: str) -> CompanySearchResult:
     web_agent = make_web_search_agent()
     enrichment_agent = make_hunter_enrichment_agent()
     merger_agent = make_merger_agent()
+    ranker_agent = make_ranker_agent()
 
     # ── Parallel research tasks ───────────────────────────────────────────────
     linkedin_task = make_linkedin_task(linkedin_agent, company)
@@ -79,7 +82,11 @@ def run_bossfinder(company: str) -> CompanySearchResult:
     merger_task = make_merger_task(merger_agent, company)
     merger_task.context = research_tasks
 
-    all_tasks = research_tasks + [merger_task]
+    # ── Ranker task gets the merger output as context ─────────────────────────
+    ranker_task = make_ranker_task(ranker_agent, company)
+    ranker_task.context = [merger_task]
+
+    all_tasks = research_tasks + [merger_task, ranker_task]
     all_agents = [
         linkedin_agent,
         email_agent,
@@ -88,6 +95,7 @@ def run_bossfinder(company: str) -> CompanySearchResult:
         web_agent,
         enrichment_agent,
         merger_agent,
+        ranker_agent,
     ]
 
     # ── Crew: research tasks run in parallel, merger runs sequentially after ──
@@ -100,15 +108,11 @@ def run_bossfinder(company: str) -> CompanySearchResult:
 
     result = crew.kickoff(inputs={"company": company})
 
-    # ── Post-process: deterministic deduplication on top of LLM merger ────────
-    raw_output = str(result)
+    # ── Post-process: deterministic dedup + seniority sort on top of LLM output ─
+    # crew.kickoff returns the last task's output — that's the ranker's JSON
+    ranker_output = str(result)
 
-    # Collect all individual task outputs for extra safety
-    all_raw: list[str] = [raw_output]
-    for task in research_tasks:
-        if hasattr(task, "output") and task.output:
-            all_raw.append(str(task.output))
-
+    # Parse all individual research task outputs for completeness
     all_people = []
     source_map = {
         linkedin_task: "linkedin",
@@ -122,7 +126,16 @@ def run_bossfinder(company: str) -> CompanySearchResult:
         if hasattr(task, "output") and task.output:
             all_people.extend(parse_agent_output(str(task.output), source))
 
-    # Also parse the final merger output
-    all_people.extend(parse_agent_output(raw_output, "merged"))
+    # Parse the merger output as well
+    if hasattr(merger_task, "output") and merger_task.output:
+        all_people.extend(parse_agent_output(str(merger_task.output), "merged"))
 
-    return merge_results(all_people, company)
+    # Parse the ranker output — it is authoritative for order and seniority_rank
+    ranked_people = parse_agent_output(ranker_output, "ranked")
+
+    # If the ranker produced a valid ranked list, use it as the seed for merge_results
+    # so the deterministic dedup pass inherits its seniority_rank annotations
+    seed = ranked_people if ranked_people else all_people
+    all_people_combined = seed + [p for p in all_people if p not in seed]
+
+    return merge_results(all_people_combined, company)
