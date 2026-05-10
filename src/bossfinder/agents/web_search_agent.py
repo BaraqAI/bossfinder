@@ -42,7 +42,7 @@ def make_web_search_agent() -> Agent:
     )
 
 
-def make_clearbit_enrichment_agent() -> Agent:
+def make_hunter_enrichment_agent() -> Agent:
     settings = get_settings()
     tools = []
 
@@ -50,20 +50,20 @@ def make_clearbit_enrichment_agent() -> Agent:
         tools.append(SerperDevTool())
 
     try:
-        from ..tools.clearbit_tool import ClearbitCompanyTool
-        tools.append(ClearbitCompanyTool())
+        from ..tools.hunter_tool import HunterCompanyEnrichTool
+        tools.append(HunterCompanyEnrichTool())
     except Exception:
         pass
 
     return Agent(
         role="Company & People Enrichment Specialist",
         goal=(
-            "Enrich the company profile and find executive contacts via Clearbit. "
+            "Enrich the company profile and find executive contacts via Hunter.io. "
             "Determine the company domain, industry, size, LinkedIn and Twitter handles, "
             "and a complete list of known executive contacts."
         ),
         backstory=(
-            "You specialise in B2B data enrichment. You use Clearbit to pull structured "
+            "You specialise in B2B data enrichment. You use Hunter.io to pull structured "
             "company and people data, filling gaps that raw web searches miss. "
             "You resolve company names to domains and map domains to executive email addresses."
         ),

@@ -56,6 +56,89 @@ class HunterDomainTool(BaseTool):
             return f"Hunter.io error: {e}"
 
 
+class HunterCompanyEnrichTool(BaseTool):
+    """Enrich company data and find key contacts via Hunter.io."""
+
+    name: str = "hunter_company_enrich"
+    description: str = (
+        "Enrich company information using Hunter.io. "
+        "Input: company domain (e.g. 'stripe.com') or company name. "
+        "Returns industry, description, LinkedIn/Twitter handles, employee count, and top contacts."
+    )
+    api_key: str = Field(default="")
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.api_key = get_settings().hunter_api_key
+
+    def _run(self, company: str) -> str:
+        if not self.api_key:
+            return "SKIP: HUNTER_API_KEY not configured"
+
+        domain = company.strip() if "." in company else self._resolve_domain(company)
+        if not domain:
+            return f"Could not resolve domain for: {company}"
+
+        try:
+            resp = httpx.get(
+                "https://api.hunter.io/v2/companies/find",
+                params={"domain": domain, "api_key": self.api_key},
+                timeout=20,
+            )
+            if resp.status_code == 404:
+                return f"No company found for: {domain}"
+            resp.raise_for_status()
+            c = resp.json().get("data", {})
+
+            twitter = c.get("twitter", "")
+            if twitter and not twitter.startswith("@"):
+                twitter = f"@{twitter}"
+
+            lines = [
+                f"Company: {c.get('name', '')}",
+                f"Domain: {domain}",
+                f"Industry: {c.get('industry', '')}",
+                f"Employees: {c.get('size', '')}",
+                f"Description: {(c.get('description') or '')[:250]}",
+                f"LinkedIn: {c.get('linkedin', '')}",
+                f"Twitter: {twitter}",
+                f"Location: {', '.join(filter(None, [c.get('city', ''), c.get('country', '')]))}",
+                f"Phone: {c.get('phone', '')}",
+                "",
+                "Key contacts:",
+            ]
+
+            # Pull top contacts via domain search
+            contacts_resp = httpx.get(
+                "https://api.hunter.io/v2/domain-search",
+                params={"domain": domain, "limit": 20, "api_key": self.api_key},
+                timeout=20,
+            )
+            if contacts_resp.status_code == 200:
+                for e in contacts_resp.json().get("data", {}).get("emails", []):
+                    name = f"{e.get('first_name', '')} {e.get('last_name', '')}".strip()
+                    title = e.get("position", "")
+                    email = e.get("value", "")
+                    lines.append(f"- {name} | {title} | {email}")
+
+            return "\n".join(lines)
+        except Exception as e:
+            return f"Hunter company enrich error: {e}"
+
+    def _resolve_domain(self, company_name: str) -> str | None:
+        try:
+            resp = httpx.get(
+                "https://api.hunter.io/v2/domains/find",
+                params={"company": company_name, "api_key": self.api_key},
+                timeout=10,
+            )
+            if resp.status_code == 200:
+                return resp.json().get("data", {}).get("domain")
+        except Exception:
+            pass
+        return None
+
+
 class HunterEmailFinderTool(BaseTool):
     """Find a specific person's email via Hunter.io email finder."""
 

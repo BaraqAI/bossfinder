@@ -10,7 +10,7 @@ from .agents.twitter_agent import make_twitter_agent
 from .agents.email_agent import make_email_agent
 from .agents.github_agent import make_github_agent
 from .agents.news_agent import make_news_agent
-from .agents.web_search_agent import make_web_search_agent, make_clearbit_enrichment_agent
+from .agents.web_search_agent import make_web_search_agent, make_hunter_enrichment_agent
 from .agents.merger_agent import make_merger_agent
 
 from .tasks.search_tasks import (
@@ -49,17 +49,17 @@ def run_bossfinder(company: str) -> CompanySearchResult:
 
     # ── Agents ────────────────────────────────────────────────────────────────
     linkedin_agent = make_linkedin_agent()
-    twitter_agent = make_twitter_agent()
+    # twitter_agent = make_twitter_agent()  # excluded from pipeline for now
     email_agent = make_email_agent()
     github_agent = make_github_agent()
     news_agent = make_news_agent()
     web_agent = make_web_search_agent()
-    enrichment_agent = make_clearbit_enrichment_agent()
+    enrichment_agent = make_hunter_enrichment_agent()
     merger_agent = make_merger_agent()
 
     # ── Parallel research tasks ───────────────────────────────────────────────
     linkedin_task = make_linkedin_task(linkedin_agent, company)
-    twitter_task = make_twitter_task(twitter_agent, company)
+    # twitter_task = make_twitter_task(twitter_agent, company)  # excluded from pipeline for now
     email_task = make_email_task(email_agent, company)
     github_task = make_github_task(github_agent, company)
     news_task = make_news_task(news_agent, company)
@@ -68,7 +68,6 @@ def run_bossfinder(company: str) -> CompanySearchResult:
 
     research_tasks = [
         linkedin_task,
-        twitter_task,
         email_task,
         github_task,
         news_task,
@@ -83,7 +82,6 @@ def run_bossfinder(company: str) -> CompanySearchResult:
     all_tasks = research_tasks + [merger_task]
     all_agents = [
         linkedin_agent,
-        twitter_agent,
         email_agent,
         github_agent,
         news_agent,
@@ -114,12 +112,11 @@ def run_bossfinder(company: str) -> CompanySearchResult:
     all_people = []
     source_map = {
         linkedin_task: "linkedin",
-        twitter_task: "twitter",
         email_task: "email",
         github_task: "github",
         news_task: "news",
         web_task: "web",
-        enrichment_task: "clearbit",
+        enrichment_task: "hunter",
     }
     for task, source in source_map.items():
         if hasattr(task, "output") and task.output:

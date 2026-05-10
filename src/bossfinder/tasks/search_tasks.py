@@ -29,9 +29,9 @@ def make_linkedin_task(agent: Agent, company: str) -> Task:
     return Task(
         description=(
             f"Search LinkedIn for current employees and key executives at '{company}'. "
-            "Use Proxycurl to enumerate company employees and enrich the top 20 profiles "
-            "to collect emails and phone numbers. "
-            "For any profiles Proxycurl cannot enrich, run a site:linkedin.com Google search "
+            "Use Hunter.io to enumerate company employees by domain and find email addresses. "
+            "Enrich the top 20 profiles to collect emails and phone numbers. "
+            "For any profiles Hunter cannot resolve, run a site:linkedin.com Google search "
             "to find their profile URL, then enrich it. "
             f"Return results as JSON matching this schema: {PERSON_JSON_SCHEMA}"
         ),
@@ -139,14 +139,14 @@ def make_web_search_task(agent: Agent, company: str) -> Task:
 def make_enrichment_task(agent: Agent, company: str) -> Task:
     return Task(
         description=(
-            f"Enrich the company '{company}' via Clearbit to find its domain, industry, "
+            f"Enrich the company '{company}' via Hunter.io to find its domain, industry, "
             "size, LinkedIn/Twitter handles, and executive contacts. "
-            "Use the company domain to search for additional contacts via Clearbit Prospector. "
+            "Use the company domain to search for additional contacts via Hunter domain search. "
             f"Return results as JSON matching this schema: {PERSON_JSON_SCHEMA}"
         ),
         expected_output=(
-            "A JSON object with a 'people' array of Clearbit-sourced executives. "
-            "Source should be 'clearbit'."
+            "A JSON object with a 'people' array of Hunter-sourced executives. "
+            "Source should be 'hunter'."
         ),
         agent=agent,
     )

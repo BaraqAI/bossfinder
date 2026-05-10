@@ -19,11 +19,6 @@ class Settings(BaseSettings):
     serpapi_api_key: str = Field(default="", alias="SERPAPI_API_KEY")
     tavily_api_key: str = Field(default="", alias="TAVILY_API_KEY")
 
-    # LinkedIn
-    proxycurl_api_key: str = Field(default="", alias="PROXYCURL_API_KEY")
-    linkedin_username: str = Field(default="", alias="LINKEDIN_USERNAME")
-    linkedin_password: str = Field(default="", alias="LINKEDIN_PASSWORD")
-
     # Twitter / X
     twitter_bearer_token: str = Field(default="", alias="TWITTER_BEARER_TOKEN")
     twitter_api_key: str = Field(default="", alias="TWITTER_API_KEY")
@@ -35,8 +30,6 @@ class Settings(BaseSettings):
     hunter_api_key: str = Field(default="", alias="HUNTER_API_KEY")
     apollo_api_key: str = Field(default="", alias="APOLLO_API_KEY")
 
-    # Enrichment
-    clearbit_api_key: str = Field(default="", alias="CLEARBIT_API_KEY")
 
     # GitHub
     github_token: str = Field(default="", alias="GITHUB_TOKEN")

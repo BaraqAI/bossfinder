@@ -1,12 +1,12 @@
 from crewai import Agent
 from crewai_tools import SerperDevTool
-from ..tools.proxycurl_tool import ProxycurlCompanyTool, ProxycurlProfileTool
+from ..tools.hunter_tool import HunterDomainTool, HunterEmailFinderTool
 from ..config import get_settings
 
 
 def make_linkedin_agent() -> Agent:
     settings = get_settings()
-    tools = [ProxycurlCompanyTool(), ProxycurlProfileTool()]
+    tools = [HunterDomainTool(), HunterEmailFinderTool()]
 
     # Augment with Serper for LinkedIn-targeted web searches
     if settings.serpapi_api_key:
@@ -20,8 +20,8 @@ def make_linkedin_agent() -> Agent:
         ),
         backstory=(
             "You are a specialist in extracting professional intelligence from LinkedIn. "
-            "You use the Proxycurl API to enumerate company employees and enrich each profile "
-            "with contact details. When Proxycurl cannot resolve a profile, you fall back to "
+            "You use Hunter.io to enumerate company employees by domain and find individual email addresses. "
+            "When Hunter cannot resolve a profile, you fall back to "
             "targeted Google searches restricted to linkedin.com."
         ),
         tools=tools,

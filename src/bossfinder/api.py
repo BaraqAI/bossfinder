@@ -38,7 +38,7 @@ app = FastAPI(
     description=(
         "Multi-agent company intelligence API. "
         "Given a company name it searches LinkedIn, Twitter/X, GitHub, Hunter.io, "
-        "Apollo.io, Clearbit, NewsAPI, and the open web to find key people and contacts."
+        "Apollo.io, People Data Labs, NewsAPI, and the open web to find key people and contacts."
     ),
     version="0.1.0",
     lifespan=lifespan,
